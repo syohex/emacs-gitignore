@@ -24,18 +24,21 @@
 ;;; Code:
 
 (defconst gitignore--url "http://www.gitignore.io/api/")
+(defvar gitignore--candidates-cache nil)
 
 (defun gitignore--collect-candidates ()
-  (let ((list-url (concat gitignore--url "list")))
-    (with-temp-buffer
-      (unless (call-process "curl" nil t nil "-s" list-url)
-        (error "Can't download %s" list-url))
-      (split-string (buffer-string) ","))))
+  (or gitignore--candidates-cache
+      (let ((list-url (concat gitignore--url "list")))
+        (with-temp-buffer
+          (unless (process-file "curl" nil t nil "-s" list-url)
+            (error "Can't download %s" list-url))
+          (let ((cands (split-string (buffer-string) ",")))
+            (setq gitignore--candidates-cache cands))))))
 
 (defun gitignore--get-gitignore (type)
   (let ((type-url (concat gitignore--url type)))
     (with-temp-buffer
-      (unless (call-process "curl" nil t nil "-s" type-url)
+      (unless (process-file "curl" nil t nil "-s" type-url)
         (error "Can't download %s" type-url))
       (buffer-string))))
 
