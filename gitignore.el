@@ -1,6 +1,6 @@
 ;;; gitignore.el --- .gitignore for Emacs
 
-;; Copyright (C) 2014 by Syohei YOSHIDA
+;; Copyright (C) 2016 by Syohei YOSHIDA
 
 ;; Author: Syohei YOSHIDA <syohex@gmail.com>
 ;; URL: https://github.com/syohex/emacs-gitignore
@@ -23,23 +23,25 @@
 
 ;;; Code:
 
+(require 'url)
+(eval-when-compile
+  (defvar url-http-end-of-headers))
+
 (defconst gitignore--url "https://www.gitignore.io/api/")
 (defvar gitignore--candidates-cache nil)
 
 (defun gitignore--collect-candidates ()
   (or gitignore--candidates-cache
       (let ((list-url (concat gitignore--url "list")))
-        (with-temp-buffer
-          (unless (process-file "curl" nil t nil "-s" list-url)
-            (error "Can't download %s" list-url))
-          (goto-char (point-min))
+        (with-current-buffer (url-retrieve-synchronously list-url t)
+          (goto-char url-http-end-of-headers)
           (let (cands)
             (while (not (eobp))
               (let ((line (buffer-substring-no-properties
                            (line-beginning-position) (line-end-position))))
                 (setq cands (append (split-string line ",") cands))
                 (forward-line 1)))
-            (reverse cands))))))
+            (setq gitignore--candidates-cache (reverse cands)))))))
 
 (defun gitignore--get-gitignore (type)
   (let ((type-url (concat gitignore--url type)))
