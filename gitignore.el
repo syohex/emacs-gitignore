@@ -1,10 +1,11 @@
-;;; gitignore.el --- .gitignore for Emacs
+;;; gitignore.el --- Generate .gitignore by gitignore.io -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2016 by Syohei YOSHIDA
 
 ;; Author: Syohei YOSHIDA <syohex@gmail.com>
 ;; URL: https://github.com/syohex/emacs-gitignore
 ;; Version: 0.01
+;; Package-Requires: ((emacs "24.3"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
