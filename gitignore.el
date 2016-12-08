@@ -44,24 +44,32 @@
                 (forward-line 1)))
             (setq gitignore--candidates-cache (reverse cands)))))))
 
-(defun gitignore--get-gitignore (type)
+(defun gitignore--get-gitignore (type buf)
   (let ((type-url (concat gitignore--url type)))
-    (with-temp-buffer
-      (unless (process-file "curl" nil t nil "-s" type-url)
-        (error "Can't download %s" type-url))
-      (buffer-string))))
+    (url-retrieve
+     type-url
+     (lambda (&rest _unused)
+       (goto-char url-http-end-of-headers)
+       (let ((gitignore (buffer-substring-no-properties (point) (point-max))))
+         (with-current-buffer buf
+           (save-excursion
+             (insert gitignore)))))
+     nil t)))
 
 ;;;###autoload
 (defun gitignore (&optional ignoretype)
   (interactive)
   (let ((file (buffer-file-name)))
     (unless (and file (string= (file-name-nondirectory file) ".gitignore"))
-      (error "Error: current file is not '.gitignore'"))
+      (unless (file-exists-p ".gitignore")
+        (unless (yes-or-no-p "Create .gitignore in current directory ?")
+          (user-error "Abort")))
+      (find-file ".gitignore")
+      (goto-char (point-max)))
     (let* ((read-func (if ido-mode 'ido-completing-read 'completing-read))
            (candidates (gitignore--collect-candidates))
            (type (or ignoretype (funcall read-func "Type: " candidates nil t))))
-      (insert (gitignore--get-gitignore type))
-      (goto-char (point-min)))))
+      (gitignore--get-gitignore type (current-buffer)))))
 
 (provide 'gitignore)
 
