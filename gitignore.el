@@ -22,6 +22,8 @@
 
 ;;; Commentary:
 
+;; Generate .gitignore file by using gitignore.io API.
+
 ;;; Code:
 
 (require 'url)

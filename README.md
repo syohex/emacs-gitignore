@@ -11,4 +11,4 @@ Generate .gitignore file from [gitignore.io](http://www.gitignore.io/)
 
 #### `M-x gitignore`
 
-Generating specified type .gitignore
+Generating specified type .gitignore in current directory. If current file is .gitignore, then this command inserts response of gitignore.io response at current point.
